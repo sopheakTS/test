@@ -44,7 +44,7 @@ function getProducts_(){
   const s=sh_('Sheet1'); if(!s||s.getLastRow()<2)return [];
   return s.getRange(2,1,s.getLastRow()-1,15).getValues().map((r,i)=>{
     if(!r[0]&&!r[1])return null;
-    return {row:i+2,name:String(r[0]||''),code:String(r[1]||''),variant:String(r[2]||''),
+    return {rowIndex:i+2,name:String(r[0]||''),code:String(r[1]||''),variant:String(r[2]||''),
       price:money_(r[3]),category:String(r[5]||''),photo:String(r[10]||''),stock:Number(r[12])||0,
       updateDate:date_(r[13]),cost:money_(r[14])};
   }).filter(Boolean);
