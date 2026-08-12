@@ -1,55 +1,432 @@
-<!doctype html><html lang="km"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>DADING Store</title><script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>*{font-family:'Kantumruy Pro',sans-serif}body{background:#f1f5f9}.tab.active{background:#2563eb;color:white}</style>
-</head><body class="text-slate-800">
+<!doctype html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <title>DADING Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{font-family:'Kantumruy Pro',sans-serif}
+    body{background:#f1f5f9}
+    .tab.active{background:#2563eb;color:white}
+  </style>
+</head>
+<body class="text-slate-800">
 <div class="max-w-7xl mx-auto p-3 md:p-6">
-<header class="bg-slate-900 text-white rounded-2xl p-4 flex flex-wrap gap-3 justify-between items-center mb-4">
-<div><b class="text-xl text-blue-400">DADING Store</b><div class="text-xs text-slate-400">POS • Stock • Customers • Reports</div></div>
-<div id="apiState" class="text-xs px-3 py-1 rounded-full bg-slate-700">Connecting...</div></header>
-<nav class="flex gap-2 overflow-x-auto mb-4"><button class="tab active px-4 py-2 rounded-xl" onclick="tab('invoice',this)">🧾 Invoice</button><button class="tab px-4 py-2 rounded-xl" onclick="tab('products',this)">📦 Products</button><button class="tab px-4 py-2 rounded-xl" onclick="tab('customers',this)">👥 Customers</button><button class="tab px-4 py-2 rounded-xl" onclick="tab('reports',this)">📊 Reports</button></nav>
+  <header class="bg-slate-900 text-white rounded-2xl p-4 flex flex-wrap gap-3 justify-between items-center mb-4">
+    <div>
+      <b class="text-xl text-blue-400">DADING Store</b>
+      <div class="text-xs text-slate-400">POS • Stock • Customers • Reports</div>
+    </div>
+    <div id="apiState" class="text-xs px-3 py-1 rounded-full bg-slate-700">Connecting...</div>
+  </header>
 
-<section id="invoice" class="panel">
-<div class="grid lg:grid-cols-3 gap-4"><div class="lg:col-span-2 bg-white rounded-2xl p-4 shadow-sm">
-<div class="flex gap-2 mb-3"><input id="search" list="productList" class="flex-1 border-2 border-amber-300 bg-amber-50 rounded-xl p-3" placeholder="🔍 Search Name / Code / Variant"><datalist id="productList"></datalist></div>
-<table class="w-full text-sm"><thead><tr class="bg-slate-800 text-white"><th class="p-2">#</th><th class="p-2 text-left">Product</th><th class="p-2">Qty</th><th class="p-2 text-right">Price</th><th class="p-2 text-right">Total</th><th></th></tr></thead><tbody id="cart"></tbody></table></div>
-<div class="bg-white rounded-2xl p-4 shadow-sm"><h3 class="font-bold mb-3">Customer</h3><input id="cname" list="customerList" class="w-full border rounded-lg p-2 mb-2" placeholder="ឈ្មោះ"><datalist id="customerList"></datalist><input id="cphone" class="w-full border rounded-lg p-2 mb-2" placeholder="លេខទូរស័ព្ទ"><input id="caddress" class="w-full border rounded-lg p-2 mb-2" placeholder="អាសយដ្ឋាន"><input id="salesman" class="w-full border rounded-lg p-2 mb-2" placeholder="អ្នកលក់"><select id="payment" class="w-full border rounded-lg p-2 mb-4"><option>Paid</option><option>Pending</option><option>Due</option><option>Returned</option></select>
-<div class="space-y-2 border-t pt-3"><div class="flex justify-between"><span>Subtotal</span><b id="subtotal">$0.00</b></div><div class="flex justify-between items-center"><span>Discount</span><input id="discount" value="0" class="w-28 border rounded p-1 text-right" oninput="calc()"></div><div class="flex justify-between items-center"><span>Shipping</span><input id="shipping" value="0" class="w-28 border rounded p-1 text-right" oninput="calc()"></div><div class="flex justify-between text-xl border-t pt-2"><b>Total</b><b id="grand" class="text-blue-600">$0.00</b></div><div id="khr" class="text-right text-xs text-slate-400">0 ៛</div></div><button onclick="saveInvoice()" id="saveBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-3 mt-4 font-bold">💾 Save Invoice</button></div></div></section>
+  <nav class="flex gap-2 overflow-x-auto mb-4">
+    <button class="tab active px-4 py-2 rounded-xl" onclick="tab('invoice',this)">🧾 Invoice</button>
+    <button class="tab px-4 py-2 rounded-xl" onclick="tab('products',this)">📦 Products</button>
+    <button class="tab px-4 py-2 rounded-xl" onclick="tab('customers',this)">👥 Customers</button>
+    <button class="tab px-4 py-2 rounded-xl" onclick="tab('reports',this)">📊 Reports</button>
+  </nav>
 
-<section id="products" class="panel hidden"><div class="bg-white rounded-2xl p-4"><div class="flex gap-2 mb-4"><input id="psearch" oninput="renderProducts()" class="flex-1 border rounded-xl p-3" placeholder="🔍 Search products"><button onclick="newProduct()" class="bg-blue-600 text-white px-4 rounded-xl">➕ Add</button></div><div class="overflow-auto"><table class="w-full text-sm"><thead><tr class="bg-slate-800 text-white"><th class="p-2">Photo</th><th class="p-2">Code</th><th class="p-2">Name</th><th class="p-2">Variant</th><th class="p-2">Sale</th><th class="p-2">Stock</th><th class="p-2">Cost</th><th></th></tr></thead><tbody id="productRows"></tbody></table></div></div></section>
+  <!-- Section 1: Invoice / POS -->
+  <section id="invoice" class="panel">
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-2 bg-white rounded-2xl p-4 shadow-sm">
+        <div class="flex gap-2 mb-3">
+          <input id="search" list="productList" class="flex-1 border-2 border-amber-300 bg-amber-50 rounded-xl p-3" placeholder="🔍 Search Name / Code / Variant">
+          <datalist id="productList"></datalist>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-slate-800 text-white">
+                <th class="p-2">#</th>
+                <th class="p-2 text-left">Product</th>
+                <th class="p-2">Qty</th>
+                <th class="p-2 text-right">Price</th>
+                <th class="p-2 text-right">Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cart"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl p-4 shadow-sm">
+        <h3 class="font-bold mb-3">Customer</h3>
+        <input id="cname" list="customerList" class="w-full border rounded-lg p-2 mb-2" placeholder="ឈ្មោះ">
+        <datalist id="customerList"></datalist>
+        <input id="cphone" class="w-full border rounded-lg p-2 mb-2" placeholder="លេខទូរស័ព្ទ">
+        <input id="caddress" class="w-full border rounded-lg p-2 mb-2" placeholder="អាសយដ្ឋាន">
+        <input id="salesman" class="w-full border rounded-lg p-2 mb-2" placeholder="អ្នកលក់">
+        <select id="payment" class="w-full border rounded-lg p-2 mb-4">
+          <option>Paid</option>
+          <option>Pending</option>
+          <option>Due</option>
+          <option>Returned</option>
+        </select>
+        <div class="space-y-2 border-t pt-3">
+          <div class="flex justify-between"><span>Subtotal</span><b id="subtotal">$0.00</b></div>
+          <div class="flex justify-between items-center">
+            <span>Discount</span>
+            <input id="discount" value="0" class="w-28 border rounded p-1 text-right" oninput="calc()">
+          </div>
+          <div class="flex justify-between items-center">
+            <span>Shipping</span>
+            <input id="shipping" value="0" class="w-28 border rounded p-1 text-right" oninput="calc()">
+          </div>
+          <div class="flex justify-between text-xl border-t pt-2">
+            <b>Total</b>
+            <b id="grand" class="text-blue-600">$0.00</b>
+          </div>
+          <div id="khr" class="text-right text-xs text-slate-400">0 ៛</div>
+        </div>
+        <button onclick="saveInvoice()" id="saveBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-3 mt-4 font-bold">💾 Save Invoice</button>
+      </div>
+    </div>
+  </section>
 
-<section id="customers" class="panel hidden"><div class="bg-white rounded-2xl p-4"><div class="flex gap-2 mb-4"><input id="csearch" oninput="renderCustomers()" class="flex-1 border rounded-xl p-3" placeholder="🔍 Search customer"><button onclick="newCustomer()" class="bg-blue-600 text-white px-4 rounded-xl">➕ Add</button></div><div class="overflow-auto"><table class="w-full text-sm"><thead><tr class="bg-slate-800 text-white"><th class="p-2 text-left">ឈ្មោះ</th><th class="p-2">Phone</th><th class="p-2 text-left">Address</th><th></th></tr></thead><tbody id="customerRows"></tbody></table></div></div></section>
+  <!-- Section 2: Products -->
+  <section id="products" class="panel hidden">
+    <div class="bg-white rounded-2xl p-4 shadow-sm">
+      <div class="flex gap-2 mb-4">
+        <input id="psearch" oninput="renderProducts()" class="flex-1 border rounded-xl p-3" placeholder="🔍 Search products">
+        <button onclick="newProduct()" class="bg-blue-600 text-white px-4 rounded-xl">➕ Add</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-800 text-white">
+              <th class="p-2">Photo</th>
+              <th class="p-2">Code</th>
+              <th class="p-2">Name</th>
+              <th class="p-2">Variant</th>
+              <th class="p-2">Sale</th>
+              <th class="p-2">Stock</th>
+              <th class="p-2">Cost</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="productRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
-<section id="reports" class="panel hidden"><div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4"><div class="bg-white p-4 rounded-xl"><small>Revenue</small><b id="rRev" class="block text-xl text-emerald-600"></b></div><div class="bg-white p-4 rounded-xl"><small>Cost</small><b id="rCost" class="block text-xl"></b></div><div class="bg-white p-4 rounded-xl"><small>Profit</small><b id="rProfit" class="block text-xl text-blue-600"></b></div><div class="bg-white p-4 rounded-xl"><small>Invoices</small><b id="rCount" class="block text-xl"></b></div><div class="bg-white p-4 rounded-xl"><small>Low Stock</small><b id="rLow" class="block text-xl text-red-600"></b></div></div><div class="bg-white rounded-2xl p-4 overflow-auto"><table class="w-full text-sm"><thead><tr class="bg-slate-800 text-white"><th class="p-2">Invoice</th><th class="p-2">Date</th><th class="p-2">Customer</th><th class="p-2">Salesman</th><th class="p-2">Status</th><th class="p-2 text-right">Total</th><th class="p-2 text-right">Profit</th></tr></thead><tbody id="reportRows"></tbody></table></div></section>
+  <!-- Section 3: Customers -->
+  <section id="customers" class="panel hidden">
+    <div class="bg-white rounded-2xl p-4 shadow-sm">
+      <div class="flex gap-2 mb-4">
+        <input id="csearch" oninput="renderCustomers()" class="flex-1 border rounded-xl p-3" placeholder="🔍 Search customer">
+        <button onclick="newCustomer()" class="bg-blue-600 text-white px-4 rounded-xl">➕ Add</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-800 text-white">
+              <th class="p-2 text-left">ឈ្មោះ</th>
+              <th class="p-2">Phone</th>
+              <th class="p-2 text-left">Address</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="customerRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Reports -->
+  <section id="reports" class="panel hidden">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+      <div class="bg-white p-4 rounded-xl shadow-sm"><small class="text-slate-500">Revenue</small><b id="rRev" class="block text-xl text-emerald-600">$0.00</b></div>
+      <div class="bg-white p-4 rounded-xl shadow-sm"><small class="text-slate-500">Cost</small><b id="rCost" class="block text-xl">$0.00</b></div>
+      <div class="bg-white p-4 rounded-xl shadow-sm"><small class="text-slate-500">Profit</small><b id="rProfit" class="block text-xl text-blue-600">$0.00</b></div>
+      <div class="bg-white p-4 rounded-xl shadow-sm"><small class="text-slate-500">Invoices</small><b id="rCount" class="block text-xl">0</b></div>
+      <div class="bg-white p-4 rounded-xl shadow-sm"><small class="text-slate-500">Low Stock</small><b id="rLow" class="block text-xl text-red-600">0</b></div>
+    </div>
+    <div class="bg-white rounded-2xl p-4 shadow-sm overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-slate-800 text-white">
+            <th class="p-2">Invoice</th>
+            <th class="p-2">Date</th>
+            <th class="p-2">Customer</th>
+            <th class="p-2">Salesman</th>
+            <th class="p-2">Status</th>
+            <th class="p-2 text-right">Total</th>
+            <th class="p-2 text-right">Profit</th>
+          </tr>
+        </thead>
+        <tbody id="reportRows"></tbody>
+      </table>
+    </div>
+  </section>
 </div>
 
-<div id="modal" class="hidden fixed inset-0 bg-black/50 p-3 items-center justify-center"><div class="bg-white rounded-2xl p-5 max-w-lg w-full"><h3 id="modalTitle" class="font-bold text-lg mb-3"></h3><div id="modalBody"></div></div></div>
+<!-- Modal Container -->
+<div id="modal" class="hidden fixed inset-0 bg-black/50 p-3 items-center justify-center z-50">
+  <div class="bg-white rounded-2xl p-5 max-w-lg w-full shadow-xl">
+    <h3 id="modalTitle" class="font-bold text-lg mb-3"></h3>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
 <script>
-const API='https://script.google.com/macros/s/AKfycbyuVu-n2rJ94ESmD-jSk_zK__zb9zEgSKhBfURvB6nDkKAU-gDAWp2IJy7-6eVPx-le/exec';
-let products=[],customers=[],cart=[],reports=[];
-const $=id=>document.getElementById(id);
-async function api(action,data={}){if(API.startsWith('YOUR_'))throw Error('សូមដាក់ Google Apps Script Web App URL ក្នុង index.html');let r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...data})});return r.json();}
-async function init(){try{let [p,c,r]=await Promise.all([api('getProducts'),api('getCustomers'),api('getReports')]);products=p.products||[];customers=c.customers||[];reports=r.reports?.invoices||[];apiState.textContent='● API Connected';apiState.className='text-xs px-3 py-1 rounded-full bg-emerald-600';refreshLists();renderProducts();renderCustomers();renderReports();}catch(e){apiState.textContent='● API Error';apiState.className='text-xs px-3 py-1 rounded-full bg-red-600';console.error(e);}}
-function tab(id,b){document.querySelectorAll('.panel').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
-function refreshLists(){productList.innerHTML=products.map(p=>`<option value="${p.name} (${p.code})">Stock ${p.stock} • $${p.price}</option>`).join('');customerList.innerHTML=customers.map(c=>`<option value="${c.name}">${c.phone}</option>`).join('');}
-search.addEventListener('change',()=>{let v=search.value,p=products.find(x=>`${x.name} (${x.code})`===v)||products.find(x=>x.code===v||x.name===v);if(p)addCart(p);search.value='';});
-cname.addEventListener('change',()=>{let c=customers.find(x=>x.name===cname.value);if(c){cphone.value=c.phone;caddress.value=c.address;}});
-function addCart(p){let x=cart.find(i=>i.code===p.code);if(x){if(x.quantity<p.stock)x.quantity++;}else cart.push({code:p.code,description:p.name,price:p.price,quantity:1,stock:p.stock});renderCart();}
-function renderCart(){cartEl=cart;cart.innerHTML=cartEl.map((x,i)=>`<tr class="border-b"><td class="p-2">${i+1}</td><td class="p-2"><b>${x.description}</b><div class="text-xs text-slate-400">${x.code}</div></td><td class="p-2"><input type="number" min="1" max="${x.stock}" value="${x.quantity}" onchange="cart[${i}].quantity=Math.min(${x.stock},Math.max(1,+this.value||1));renderCart()" class="w-16 border rounded p-1 text-center"></td><td class="p-2 text-right">$${x.price.toFixed(2)}</td><td class="p-2 text-right">$${(x.price*x.quantity).toFixed(2)}</td><td><button onclick="cart.splice(${i},1);renderCart()" class="text-red-600">✕</button></td></tr>`).join('');calc();}
-function calc(){let sub=cart.reduce((s,x)=>s+x.price*x.quantity,0),dv=discount.value,disc=String(dv).includes('%')?sub*(parseFloat(dv)||0)/100:(parseFloat(dv)||0),ship=parseFloat(shipping.value)||0,g=Math.max(0,sub-disc+ship);subtotal.textContent='$'+sub.toFixed(2);grand.textContent='$'+g.toFixed(2);khr.textContent=Math.round(g*4000).toLocaleString()+' ៛';return {sub,disc,ship,g};}
-async function saveInvoice(){if(!cart.length)return alert('សូមបន្ថែមទំនិញ');let x=calc();saveBtn.disabled=true;try{let r=await api('saveInvoice',{invoiceNo:'',date:new Date().toISOString(),clientName:cname.value||'អតិថិជនទូទៅ',clientPhone:cphone.value,clientAddress:caddress.value,salesman:salesman.value,items:cart.map(i=>({...i,total:i.price*i.quantity})),discount:x.disc,shipping:x.ship,grandTotalUSD:x.g,paymentStatus:payment.value});if(!r.success)throw Error(r.message);alert('រក្សាទុករួចរាល់: '+r.invoiceNo);cart=[];renderCart();await init();}catch(e){alert(e.message)}finally{saveBtn.disabled=false;}}
-function renderProducts(){let q=(psearch.value||'').toLowerCase();productRows.innerHTML=products.filter(p=>[p.name,p.code,p.variant,p.category].join(' ').toLowerCase().includes(q)).map(p=>`<tr class="border-b"><td class="p-2">${p.photo?`<img src="${p.photo}" class="w-10 h-10 rounded object-cover">`:'-'}</td><td class="p-2 font-bold">${p.code}</td><td class="p-2">${p.name}</td><td class="p-2">${p.variant}</td><td class="p-2">$${p.price.toFixed(2)}</td><td class="p-2 font-bold ${p.stock<=10?'text-red-600':''}">${p.stock}</td><td class="p-2">$${p.cost.toFixed(2)}</td><td><button onclick='editProduct(${JSON.stringify(p)})'>✏️</button></td></tr>`).join('');}
-function renderCustomers(){let q=(csearch.value||'').toLowerCase();customerRows.innerHTML=customers.filter(c=>[c.name,c.phone,c.address].join(' ').toLowerCase().includes(q)).map((c,i)=>`<tr class="border-b"><td class="p-2">${c.name}</td><td class="p-2">${c.phone}</td><td class="p-2">${c.address}</td><td><button onclick='editCustomer(${JSON.stringify(c)})'>✏️</button></td></tr>`).join('');}
-function renderReports(){let R=reports.reduce((s,x)=>s+x.total,0),C=reports.reduce((s,x)=>s+x.cost,0);rRev.textContent='$'+R.toFixed(2);rCost.textContent='$'+C.toFixed(2);rProfit.textContent='$'+(R-C).toFixed(2);rCount.textContent=reports.length;rLow.textContent=(reports.filter(()=>false),0);reportRows.innerHTML=reports.slice().reverse().map(x=>`<tr class="border-b"><td class="p-2">${x.invoiceNo}</td><td class="p-2">${x.date}</td><td class="p-2">${x.clientName}</td><td class="p-2">${x.salesman}</td><td class="p-2">${x.status}</td><td class="p-2 text-right">$${x.total.toFixed(2)}</td><td class="p-2 text-right">$${x.profit.toFixed(2)}</td></tr>`).join('');}
-function modal(title,html){modalTitle.textContent=title;modalBody.innerHTML=html;document.getElementById('modal').classList.remove('hidden');document.getElementById('modal').classList.add('flex');}
-function closeModal(){document.getElementById('modal').classList.add('hidden');}
-function newProduct(){modal('Add Product',productForm({}));}
-function editProduct(p){modal('Edit Product',productForm(p));}
-function productForm(p){return `<div class="grid grid-cols-2 gap-2"><input id="mrow" type="hidden" value="${p.rowIndex||''}"><input id="mname" class="border rounded p-2" placeholder="Name" value="${p.name||''}"><input id="mcode" class="border rounded p-2" placeholder="Code" value="${p.code||''}"><input id="mvariant" class="border rounded p-2" placeholder="Variant" value="${p.variant||''}"><input id="mcat" class="border rounded p-2" placeholder="Category" value="${p.category||''}"><input id="mprice" type="number" class="border rounded p-2" placeholder="Sale" value="${p.price||0}"><input id="mstock" type="number" class="border rounded p-2" placeholder="Stock" value="${p.stock||0}"><input id="mcost" type="number" class="border rounded p-2" placeholder="Cost" value="${p.cost||0}"><input id="mphoto" class="border rounded p-2" placeholder="Photo URL" value="${p.photo||''}"></div><div class="flex gap-2 mt-4"><button onclick="closeModal()" class="flex-1 p-2 bg-slate-200 rounded">Cancel</button><button onclick="saveProduct()" class="flex-1 p-2 bg-blue-600 text-white rounded">Save</button></div>`}
-async function saveProduct(){let r=await api('saveProduct',{rowIndex:mrow.value,name:mname.value,code:mcode.value,variant:mvariant.value,category:mcat.value,price:+mprice.value,stock:+mstock.value,cost:+mcost.value,photo:mphoto.value});if(!r.success)return alert(r.message);closeModal();await init();}
-function newCustomer(){modal('Add Customer',customerForm({}));}function editCustomer(c){modal('Edit Customer',customerForm(c));}
-function customerForm(c){return `<input id="mn" class="w-full border rounded p-2 mb-2" placeholder="ឈ្មោះ" value="${c.name||''}"><input id="mp" class="w-full border rounded p-2 mb-2" placeholder="Phone" value="${c.phone||''}"><input id="ma" class="w-full border rounded p-2" placeholder="Address" value="${c.address||''}"><div class="flex gap-2 mt-4"><button onclick="closeModal()" class="flex-1 p-2 bg-slate-200 rounded">Cancel</button><button onclick="saveCustomer()" class="flex-1 p-2 bg-blue-600 text-white rounded">Save</button></div>`}
-async function saveCustomer(){let r=await api('saveCustomer',{name:mn.value,phone:mp.value,address:ma.value});if(!r.success)return alert(r.message);closeModal();await init();}
-document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});init();
-</script></body></html>
+  const API = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+  let products = [], customers = [], cart = [], reports = [];
+  const $ = id => document.getElementById(id);
+
+  async function api(action, data = {}) {
+    if (API.startsWith('YOUR_')) throw Error('សូមដាក់ Google Apps Script Web App URL ក្នុង index.html');
+    let r = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, ...data })
+    });
+    return r.json();
+  }
+
+  async function init() {
+    try {
+      let [p, c, r] = await Promise.all([api('getProducts'), api('getCustomers'), api('getReports')]);
+      products = p.products || [];
+      customers = c.customers || [];
+      reports = r.reports?.invoices || [];
+      
+      apiState.textContent = '● API Connected';
+      apiState.className = 'text-xs px-3 py-1 rounded-full bg-emerald-600 text-white';
+      
+      refreshLists();
+      renderProducts();
+      renderCustomers();
+      renderReports();
+    } catch (e) {
+      apiState.textContent = '● API Error';
+      apiState.className = 'text-xs px-3 py-1 rounded-full bg-red-600 text-white';
+      console.error(e);
+    }
+  }
+
+  function tab(id, b) {
+    document.querySelectorAll('.panel').forEach(x => x.classList.add('hidden'));
+    $(id).classList.remove('hidden');
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+  }
+
+  function refreshLists() {
+    productList.innerHTML = products.map(p => `<option value="${p.name} (${p.code})">Stock ${p.stock} • $${p.price}</option>`).join('');
+    customerList.innerHTML = customers.map(c => `<option value="${c.name}">${c.phone}</option>`).join('');
+  }
+
+  search.addEventListener('change', () => {
+    let v = search.value, p = products.find(x => `${x.name} (${x.code})` === v) || products.find(x => x.code === v || x.name === v);
+    if (p) addCart(p);
+    search.value = '';
+  });
+
+  cname.addEventListener('change', () => {
+    let c = customers.find(x => x.name === cname.value);
+    if (c) { cphone.value = c.phone; caddress.value = c.address; }
+  });
+
+  function addCart(p) {
+    let x = cart.find(i => i.code === p.code);
+    if (x) {
+      if (x.quantity < p.stock) x.quantity++;
+    } else {
+      cart.push({ code: p.code, description: p.name, price: p.price, quantity: 1, stock: p.stock });
+    }
+    renderCart();
+  }
+
+  function renderCart() {
+    $('cart').innerHTML = cart.map((x, i) => `
+      <tr class="border-b">
+        <td class="p-2">${i+1}</td>
+        <td class="p-2"><b>${x.description}</b><div class="text-xs text-slate-400">${x.code}</div></td>
+        <td class="p-2"><input type="number" min="1" max="${x.stock}" value="${x.quantity}" onchange="cart[${i}].quantity=Math.min(${x.stock},Math.max(1,+this.value||1));renderCart()" class="w-16 border rounded p-1 text-center"></td>
+        <td class="p-2 text-right">$${x.price.toFixed(2)}</td>
+        <td class="p-2 text-right">$${(x.price*x.quantity).toFixed(2)}</td>
+        <td class="p-2 text-center"><button onclick="cart.splice(${i},1);renderCart()" class="text-red-600 font-bold">✕</button></td>
+      </tr>
+    `).join('');
+    calc();
+  }
+
+  function calc() {
+    let sub = cart.reduce((s, x) => s + x.price * x.quantity, 0),
+        dv = discount.value,
+        disc = String(dv).includes('%') ? sub * (parseFloat(dv) || 0) / 100 : (parseFloat(dv) || 0),
+        ship = parseFloat(shipping.value) || 0,
+        g = Math.max(0, sub - disc + ship);
+    
+    subtotal.textContent = '$' + sub.toFixed(2);
+    grand.textContent = '$' + g.toFixed(2);
+    khr.textContent = Math.round(g * 4000).toLocaleString() + ' ៛';
+    return { sub, disc, ship, g };
+  }
+
+  async function saveInvoice() {
+    if (!cart.length) return alert('សូមបន្ថែមទំនិញ');
+    let x = calc();
+    saveBtn.disabled = true;
+    try {
+      let r = await api('saveInvoice', {
+        invoiceNo: '',
+        date: new Date().toISOString(),
+        clientName: cname.value || 'អតិថិជនទូទៅ',
+        clientPhone: cphone.value,
+        clientAddress: caddress.value,
+        salesman: salesman.value,
+        items: cart.map(i => ({ ...i, total: i.price * i.quantity })),
+        discount: x.disc,
+        shipping: x.ship,
+        grandTotalUSD: x.g,
+        paymentStatus: payment.value
+      });
+      if (!r.success) throw Error(r.message);
+      alert('រក្សាទុករួចរាល់: ' + r.invoiceNo);
+      cart = [];
+      renderCart();
+      await init();
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      saveBtn.disabled = false;
+    }
+  }
+
+  function renderProducts() {
+    let q = (psearch.value || '').toLowerCase();
+    productRows.innerHTML = products.filter(p => [p.name, p.code, p.variant, p.category].join(' ').toLowerCase().includes(q)).map(p => `
+      <tr class="border-b">
+        <td class="p-2">${p.photo ? `<img src="${p.photo}" class="w-10 h-10 rounded object-cover">` : '-'}</td>
+        <td class="p-2 font-bold">${p.code}</td>
+        <td class="p-2">${p.name}</td>
+        <td class="p-2">${p.variant}</td>
+        <td class="p-2">$${p.price.toFixed(2)}</td>
+        <td class="p-2 font-bold ${p.stock <= 10 ? 'text-red-600' : ''}">${p.stock}</td>
+        <td class="p-2">$${p.cost.toFixed(2)}</td>
+        <td class="p-2 text-center"><button onclick='editProduct(${JSON.stringify(p)})'>✏️</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function renderCustomers() {
+    let q = (csearch.value || '').toLowerCase();
+    customerRows.innerHTML = customers.filter(c => [c.name, c.phone, c.address].join(' ').toLowerCase().includes(q)).map(c => `
+      <tr class="border-b">
+        <td class="p-2">${c.name}</td>
+        <td class="p-2">${c.phone}</td>
+        <td class="p-2">${c.address}</td>
+        <td class="p-2 text-center"><button onclick='editCustomer(${JSON.stringify(c)})'>✏️</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function renderReports() {
+    let R = reports.reduce((s, x) => s + x.total, 0),
+        C = reports.reduce((s, x) => s + x.cost, 0),
+        low = products.filter(p => p.stock <= 10).length;
+    
+    rRev.textContent = '$' + R.toFixed(2);
+    rCost.textContent = '$' + C.toFixed(2);
+    rProfit.textContent = '$' + (R - C).toFixed(2);
+    rCount.textContent = reports.length;
+    rLow.textContent = low;
+
+    reportRows.innerHTML = reports.slice().reverse().map(x => `
+      <tr class="border-b">
+        <td class="p-2 font-bold">${x.invoiceNo}</td>
+        <td class="p-2">${x.date}</td>
+        <td class="p-2">${x.clientName}</td>
+        <td class="p-2">${x.salesman}</td>
+        <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-slate-100">${x.status}</span></td>
+        <td class="p-2 text-right font-bold">$${x.total.toFixed(2)}</td>
+        <td class="p-2 text-right text-emerald-600 font-bold">$${x.profit.toFixed(2)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function modal(title, html) {
+    modalTitle.textContent = title;
+    modalBody.innerHTML = html;
+    $('modal').classList.remove('hidden');
+    $('modal').classList.add('flex');
+  }
+
+  function closeModal() {
+    $('modal').classList.add('hidden');
+    $('modal').classList.remove('flex');
+  }
+
+  function newProduct() { modal('Add Product', productForm({})); }
+  function editProduct(p) { modal('Edit Product', productForm(p)); }
+
+  function productForm(p) {
+    return `
+      <div class="grid grid-cols-2 gap-2">
+        <input id="mrow" type="hidden" value="${p.rowIndex || ''}">
+        <input id="mname" class="border rounded p-2" placeholder="Name" value="${p.name || ''}">
+        <input id="mcode" class="border rounded p-2" placeholder="Code" value="${p.code || ''}">
+        <input id="mvariant" class="border rounded p-2" placeholder="Variant" value="${p.variant || ''}">
+        <input id="mcat" class="border rounded p-2" placeholder="Category" value="${p.category || ''}">
+        <input id="mprice" type="number" class="border rounded p-2" placeholder="Sale" value="${p.price || 0}">
+        <input id="mstock" type="number" class="border rounded p-2" placeholder="Stock" value="${p.stock || 0}">
+        <input id="mcost" type="number" class="border rounded p-2" placeholder="Cost" value="${p.cost || 0}">
+        <input id="mphoto" class="border rounded p-2 col-span-2" placeholder="Photo URL" value="${p.photo || ''}">
+      </div>
+      <div class="flex gap-2 mt-4">
+        <button onclick="closeModal()" class="flex-1 p-2 bg-slate-200 rounded-xl">Cancel</button>
+        <button onclick="saveProduct()" class="flex-1 p-2 bg-blue-600 text-white rounded-xl font-bold">Save</button>
+      </div>
+    `;
+  }
+
+  async function saveProduct() {
+    let r = await api('saveProduct', {
+      rowIndex: mrow.value,
+      name: mname.value,
+      code: mcode.value,
+      variant: mvariant.value,
+      category: mcat.value,
+      price: +mprice.value,
+      stock: +mstock.value,
+      cost: +mcost.value,
+      photo: mphoto.value
+    });
+    if (!r.success) return alert(r.message);
+    closeModal();
+    await init();
+  }
+
+  function newCustomer() { modal('Add Customer', customerForm({})); }
+  function editCustomer(c) { modal('Edit Customer', customerForm(c)); }
+
+  function customerForm(c) {
+    return `
+      <input id="mn" class="w-full border rounded p-2 mb-2" placeholder="ឈ្មោះ" value="${c.name || ''}">
+      <input id="mp" class="w-full border rounded p-2 mb-2" placeholder="Phone" value="${c.phone || ''}">
+      <input id="ma" class="w-full border rounded p-2" placeholder="Address" value="${c.address || ''}">
+      <div class="flex gap-2 mt-4">
+        <button onclick="closeModal()" class="flex-1 p-2 bg-slate-200 rounded-xl">Cancel</button>
+        <button onclick="saveCustomer()" class="flex-1 p-2 bg-blue-600 text-white rounded-xl font-bold">Save</button>
+      </div>
+    `;
+  }
+
+  async function saveCustomer() {
+    let r = await api('saveCustomer', { name: mn.value, phone: mp.value, address: ma.value });
+    if (!r.success) return alert(r.message);
+    closeModal();
+    await init();
+  }
+
+  $('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+  init();
+</script>
+</body>
+</html>
