@@ -26,7 +26,7 @@
 
 <div id="modal" class="hidden fixed inset-0 bg-black/50 p-3 items-center justify-center"><div class="bg-white rounded-2xl p-5 max-w-lg w-full"><h3 id="modalTitle" class="font-bold text-lg mb-3"></h3><div id="modalBody"></div></div></div>
 <script>
-const API='YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+const API='https://docs.google.com/spreadsheets/d/1iXLoDPlNtwBr-jfIR8Nd73dxarb9kfv5o3r3MCRCqIo/edit?usp=sharingL';
 let products=[],customers=[],cart=[],reports=[];
 const $=id=>document.getElementById(id);
 async function api(action,data={}){if(API.startsWith('YOUR_'))throw Error('សូមដាក់ Google Apps Script Web App URL ក្នុង index.html');let r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...data})});return r.json();}
